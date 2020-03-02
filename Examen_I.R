@@ -14,7 +14,7 @@ GDP = ts(DATA[,2], frequency = 4, start = c(1978, 1))
 GDP.train = window(GDP, start = 1978, end = c(2012,4))
 
 #Out-off sample data Q1 2013 - Q4 2019 (24)
-GDP.out = window(GDP, start = (2013))
+GDP.test = window(GDP, start = (2013))
 #length of forecast
 h28 = 28
 
@@ -74,12 +74,25 @@ autoplot(GDP.train/1000) +
   autolayer(naive(GDP.train/1000, h = h28), series = "Naive", PI = FALSE)+
   autolayer(snaive(GDP.train/1000, h =  h28), series = "Sesonal naive", PI = FALSE)+
   autolayer(rwf(GDP.train/1000, h = h28, drift = TRUE), series = "Random Walk", PI = FALSE)+
-  autolayer(GDP.out/1000, series = "DATA")+
+  autolayer(GDP.test/1000, series = "DATA")+
   ggtitle("Forcast for quarterly GDP Norway")+
   xlab("Quater")+ylab("NOK in Thousands")+
   guides(colour=guide_legend(title="Forecast"))
 
 
 #snaive with include BoxCOx
-#autoplot(snaive(GDP.train, lambda = BoxCox.lambda(GDP.train), h = h28)) + autolayer(GDP.out)
-#autoplot(rwf(GDP.train, drift = TRUE, h = h28)) + autolayer(GDP.out)
+#autoplot(snaive(GDP.train, lambda = BoxCox.lambda(GDP.train), h = h28)) + autolayer(GDP.test)
+#autoplot(rwf(GDP.train, drift = TRUE, h = h28)) + autolayer(GDP.test)
+
+
+accuracy(meanf(GDP.train))
+accuracy(naive(GDP.train))
+accuracy(snaive(GDP.train))
+accuracy(rwf(GDP.train, drift = TRUE, h = h28))
+
+
+res = rwf(GDP.train, drift = TRUE, h = h28)
+autoplot(res$residuals)
+gghistogram(res$residuals, add.normal = TRUE)
+ggAcf(res$residuals)
+checkresiduals(rwf(GDP.train))
